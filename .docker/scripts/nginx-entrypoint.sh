@@ -1,14 +1,19 @@
 #!/bin/bash
 
+# Create certs directory
+mkdir -p /etc/nginx/certs
+
 # Create dummy self-signed certificate for initial startup
 if [ ! -f /etc/nginx/certs/dummy-cert.pem ]; then
   echo "Creating dummy SSL certificate"
-  mkdir -p /etc/nginx/certs
   openssl req -x509 -nodes -days 365 -newkey rsa:2048 \
     -keyout /etc/nginx/certs/dummy-key.pem \
     -out /etc/nginx/certs/dummy-cert.pem \
     -subj "/CN=next-basic.cloudfor.fun"
 fi
+
+# Copy the template to a location where we'll check for it
+cp /etc/nginx/live-ssl.conf.template /etc/nginx/certs/live-ssl.conf.disabled
 
 # Start nginx
 nginx -g "daemon off;" &
