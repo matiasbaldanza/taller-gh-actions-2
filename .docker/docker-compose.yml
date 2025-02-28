@@ -33,28 +33,26 @@ services:
       - /var/lib/letsencrypt:/var/lib/letsencrypt
       - /var/www/certbot:/var/www/certbot
     entrypoint: |
-      /bin/sh -c "
-      DOMAIN=next-basic.cloudfor.fun;
-      EMAIL=matiasbaldanza.donweb@gmail.com;
-      WEBROOT=/var/www/certbot;
+      /bin/sh -c '
+      DOMAIN="next-basic.cloudfor.fun"
+      EMAIL="matiasbaldanza.donweb@gmail.com"
+      WEBROOT="/var/www/certbot"
 
       # Check if the certificate already exists
-      if [ ! -f /etc/letsencrypt/live/$$DOMAIN/fullchain.pem ]; then
-        echo 'No existing certificate found. Requesting a new one...';
-        certbot certonly --webroot -w $$WEBROOT \
-          --email $$EMAIL --agree-tos --no-eff-email \
-          -d $$DOMAIN;
+      if [ ! -f "/etc/letsencrypt/live/$$DOMAIN/fullchain.pem" ]; then
+        echo "No existing certificate found. Requesting a new one..."
+        certbot certonly --non-interactive --agree-tos --email $$EMAIL \
+          --webroot -w $$WEBROOT -d $$DOMAIN
       fi
 
       # Renewal loop
       while :; do
-        echo 'Checking for certificate renewal...';
-        certbot renew --webroot -w $$WEBROOT && \
-        echo 'Restarting Nginx container...' && \
-        docker compose restart nginx;
-        sleep 12h;
+        echo "Checking for certificate renewal..."
+        certbot renew --webroot -w "$$WEBROOT"
+        echo "Certbot renewal process completed."
+        sleep 12h
       done
-      "
+      '
     depends_on:
       - nginx
     restart: always
