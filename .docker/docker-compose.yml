@@ -39,17 +39,17 @@ services:
       WEBROOT=/var/www/certbot;
 
       # Check if the certificate already exists
-      if [ ! -f /etc/letsencrypt/live/$DOMAIN/fullchain.pem ]; then
+      if [ ! -f /etc/letsencrypt/live/$$DOMAIN/fullchain.pem ]; then
         echo 'No existing certificate found. Requesting a new one...';
-        certbot certonly --webroot -w $WEBROOT \
-          --email $EMAIL --agree-tos --no-eff-email \
-          -d $DOMAIN;
+        certbot certonly --webroot -w $$WEBROOT \
+          --email $$EMAIL --agree-tos --no-eff-email \
+          -d $$DOMAIN;
       fi
 
       # Renewal loop
       while :; do
         echo 'Checking for certificate renewal...';
-        certbot renew --webroot -w $WEBROOT && \
+        certbot renew --webroot -w $$WEBROOT && \
         echo 'Restarting Nginx container...' && \
         docker compose restart nginx;
         sleep 12h;
