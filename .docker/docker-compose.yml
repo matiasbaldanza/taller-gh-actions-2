@@ -18,27 +18,7 @@ services:
       - "443:443"
     volumes:
       - ./nginx/nginx.prod.conf:/etc/nginx/conf.d/default.conf:ro
-      - ./nginx/certs:/etc/nginx/certs
-      - ./nginx/live-ssl.conf:/etc/nginx/live-ssl.conf.template:ro
       - /etc/letsencrypt:/etc/letsencrypt:ro
-      - /var/lib/letsencrypt:/var/lib/letsencrypt
-      - /var/log/nginx:/var/log/nginx
-      - ./scripts:/scripts:ro
-      - /var/www/certbot:/var/www/certbot
-    command: "/bin/sh -c 'chmod +x /scripts/nginx-entrypoint.sh && /scripts/nginx-entrypoint.sh'"
     depends_on:
       - app
-    restart: always
-
-  certbot:
-    container_name: certbot
-    image: certbot/certbot
-    volumes:
-      - /etc/letsencrypt:/etc/letsencrypt
-      - /var/lib/letsencrypt:/var/lib/letsencrypt
-      - /var/www/certbot:/var/www/certbot
-      - ./scripts:/scripts:ro
-    command: "/bin/sh -c 'chmod +x /scripts/certbot-entrypoint.sh && /scripts/certbot-entrypoint.sh'"
-    depends_on:
-      - nginx
     restart: always
