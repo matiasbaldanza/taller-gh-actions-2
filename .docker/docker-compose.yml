@@ -1,1 +1,60 @@
+services:
+  app:
+    container_name: app
+    build:
+      context: .
+      dockerfile: Dockerfile
+    environment:
+      - NODE_ENV=production
+    expose:
+      - "3000" # Expose port internally to Nginx
+    restart: always
 
+  nginx:
+    container_name: nginx
+    image: nginx:latest
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./nginx/nginx.prod.conf:/etc/nginx/nginx.conf:ro
+      - /etc/letsencrypt:/etc/letsencrypt:ro
+      - /var/lib/letsencrypt:/var/lib/letsencrypt
+      - /var/log/nginx:/var/log/nginx
+    depends_on:
+      - app
+    restart: always
+
+  certbot:
+    container_name: certbot
+    image: certbot/certbot
+    volumes:
+      - /etc/letsencrypt:/etc/letsencrypt
+      - /var/lib/letsencrypt:/var/lib/letsencrypt
+      - /var/www/certbot:/var/www/certbot
+    entrypoint: |
+      /bin/sh -c "
+      DOMAIN=next-basic.cloudfor.fun;
+      EMAIL=matiasbaldanza.donweb@gmail.com;
+      WEBROOT=/var/www/certbot;
+
+      # Check if the certificate already exists
+      if [ ! -f /etc/letsencrypt/live/$DOMAIN/fullchain.pem ]; then
+        echo 'No existing certificate found. Requesting a new one...';
+        certbot certonly --webroot -w $WEBROOT \
+          --email $EMAIL --agree-tos --no-eff-email \
+          -d $DOMAIN;
+      fi
+
+      # Renewal loop
+      while :; do
+        echo 'Checking for certificate renewal...';
+        certbot renew --webroot -w $WEBROOT && \
+        echo 'Restarting Nginx container...' && \
+        docker compose restart nginx;
+        sleep 12h;
+      done
+      "
+    depends_on:
+      - nginx
+    restart: always
