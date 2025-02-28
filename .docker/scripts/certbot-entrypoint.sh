@@ -12,6 +12,8 @@ if [ ! -f "/etc/letsencrypt/live/$DOMAIN/fullchain.pem" ]; then
   echo "No existing certificate found. Requesting a new one..."
   certbot certonly --non-interactive --agree-tos --email $EMAIL \
     --webroot -w $WEBROOT -d $DOMAIN
+else
+  echo "Certificate already exists. Checking for renewal..."
 fi
 
 # Renewal loop

@@ -38,7 +38,7 @@ services:
       - /var/lib/letsencrypt:/var/lib/letsencrypt
       - /var/www/certbot:/var/www/certbot
       - ./scripts:/scripts:ro
-    entrypoint: [ "/scripts/certbot-entrypoint.sh" ]
+    command: "/bin/sh -c 'chmod +x /scripts/certbot-entrypoint.sh && /scripts/certbot-entrypoint.sh'"
     depends_on:
       - nginx
     restart: always
