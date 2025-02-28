@@ -22,10 +22,10 @@ services:
       - /etc/letsencrypt:/etc/letsencrypt:ro
       - /var/lib/letsencrypt:/var/lib/letsencrypt
       - /var/log/nginx:/var/log/nginx
+    entrypoint: [ "/docker-entrypoint.sh", "nginx", "-g", "daemon off;" ]
     depends_on:
       - app
     restart: always
-    entrypoint: [ "/docker-entrypoint.sh", "nginx", "-g", "daemon off;" ]
 
   certbot:
     container_name: certbot
