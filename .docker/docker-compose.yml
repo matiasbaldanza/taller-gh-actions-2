@@ -18,12 +18,14 @@ services:
       - "443:443"
     volumes:
       - ./nginx/nginx.prod.conf:/etc/nginx/conf.d/default.conf:ro
+      - ./nginx/certs:/etc/nginx/certs:ro
       - /etc/letsencrypt:/etc/letsencrypt:ro
       - /var/lib/letsencrypt:/var/lib/letsencrypt
       - /var/log/nginx:/var/log/nginx
     depends_on:
       - app
     restart: always
+    entrypoint: [ "/docker-entrypoint.sh", "nginx", "-g", "daemon off;" ]
 
   certbot:
     container_name: certbot
