@@ -1,0 +1,15 @@
+# Ignore Next.js build artifacts
+.next
+node_modules
+npm-debug.log
+
+# Ignore local environment files
+.env
+.env.local
+
+# Ignore deployment-specific folders
+.docker/certbot/conf
+.docker/certbot/www
+
+# Ignore docker-compose files
+.docker/

@@ -6,7 +6,8 @@
     "dev": "next dev --turbopack",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint"
+    "lint": "next lint",
+    "init-scripts": "sh -c 'chmod +x scripts/*.sh'"
   },
   "dependencies": {
     "react": "^19.0.0",

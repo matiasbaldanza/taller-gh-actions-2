@@ -2,11 +2,6 @@ import Link from "next/link";
 
 // app/page.tsx (Server Component)
 export default function Home() {
-  async function getServerActionResult() {
-    "use server";
-    return "Hello from server action!";
-  }
-
   return (
     <div className="flex flex-col items-center justify-center gap-2">
       <h1 className="text-2xl font-bold">Homepage</h1>

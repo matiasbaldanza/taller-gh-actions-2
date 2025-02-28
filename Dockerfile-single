@@ -1,0 +1,26 @@
+# Imagen de base
+FROM node:20-alpine
+
+# Directorio de trabajo
+WORKDIR /app
+
+# Copiar   package.json y package-lock.json primero para aprovechar la caché de Docker
+COPY package.json package-lock.json ./
+
+# Instalar las dependencias (incluyendo las dependencias de desarrollo para el build)
+RUN npm ci
+
+# Copiar el proyecto completo
+COPY . .
+
+# Hacer el build de la aplicación
+RUN npm run build
+
+# Eliminar archivos innecesarios para reducir el tamaño de la imagen
+RUN rm -rf node_modules && npm ci --omit=dev
+
+# Exponer el puerto
+EXPOSE 3000
+
+# Inicia la aplicación
+CMD ["node", ".next/standalone/server.js"]

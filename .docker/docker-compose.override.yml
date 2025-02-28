@@ -1,0 +1,26 @@
+services:
+  app:
+    container_name: app
+    build:
+      context: ../
+      dockerfile: Dockerfile
+    environment:
+      - NODE_ENV=development
+    ports:
+      - "3000:3000" # Exponer Next.js en localhost:3000
+
+  nginx:
+    container_name: nginx
+    image: nginx:latest
+    ports:
+      - "8080:80" # Usar puerto 8080 en lugar de 80 para pruebas locales
+      - "8443:443" # Usar 8443 en lugar de 443 para evitar conflictos
+    volumes:
+      - ./nginx/nginx.local.conf:/etc/nginx/nginx.conf:ro # Usar un archivo de configuración Nginx diferente para pruebas locales
+
+  certbot:
+    container_name: certbot
+    image: certbot/certbot
+    profiles:
+      - production
+    entrypoint: "/bin/sh -c 'echo Skipping Certbot in local mode'"
