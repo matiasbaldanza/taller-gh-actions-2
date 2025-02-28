@@ -12,8 +12,10 @@ if [ ! -f /etc/nginx/certs/dummy-cert.pem ]; then
     -subj "/CN=next-basic.cloudfor.fun"
 fi
 
-# Copy the template to a location where we'll check for it
-cp /etc/nginx/live-ssl.conf.template /etc/nginx/certs/live-ssl.conf.disabled
+# Create a dynamic config file instead of copying the template
+cat > /etc/nginx/certs/live-ssl.conf.disabled << EOF
+# This is a placeholder config
+EOF
 
 # Start nginx
 nginx -g "daemon off;" &
@@ -22,10 +24,12 @@ NGINX_PID=$!
 # Watch for changes to SSL config
 while true; do
   if [ -f /etc/letsencrypt/live/next-basic.cloudfor.fun/fullchain.pem ] && \
-     [ -f /etc/letsencrypt/live/next-basic.cloudfor.fun/privkey.pem ] && \
-     [ ! -f /etc/nginx/certs/live-ssl.conf ]; then
+     [ -f /etc/letsencrypt/live/next-basic.cloudfor.fun/privkey.pem ]; then
     echo "Real certificates detected, updating nginx configuration"
-    cp /etc/nginx/certs/live-ssl.conf.disabled /etc/nginx/certs/live-ssl.conf
+    cat > /etc/nginx/certs/live-ssl.conf << EOF
+ssl_certificate /etc/letsencrypt/live/next-basic.cloudfor.fun/fullchain.pem;
+ssl_certificate_key /etc/letsencrypt/live/next-basic.cloudfor.fun/privkey.pem;
+EOF
     nginx -s reload
   fi
   sleep 6h
