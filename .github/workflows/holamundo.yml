@@ -15,6 +15,8 @@ jobs:
         run: whoami
       - name: Mostrar directorio actual
         run: pwd
+      - name: Checkout code
+        uses: actions/checkout@v4
       - name: Mostrar contenido del directorio
         run: ls -la
       - name: Mostrar variables de entorno
