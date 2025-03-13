@@ -9,4 +9,14 @@ jobs:
     steps:
       - name: Saludar
         run: echo "Hola DonWeb"
-      
+      - name: Fecha y hora
+        run: date
+      - name: Usuario actual
+        run: whoami
+      - name: Mostrar directorio actual
+        run: pwd
+      - name: Mostrar contenido del directorio
+        run: ls -la
+      - name: Mostrar variables de entorno
+        run: env
+        
