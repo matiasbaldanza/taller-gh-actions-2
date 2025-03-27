@@ -1,0 +1,54 @@
+name: Build en GH Actions y deploy remoto con imagen descargada
+
+on:
+  workflow_dispatch:
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      # Checkout del código
+      - name: Checkout del repo
+        uses: actions/checkout@v4
+
+      # Login en Docker Hub
+      - name: Login en Docker Hub
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKERHUB_USER }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+      # Build y push de la imagen
+      - name: Build y push de la imagen
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          push: true
+          tags: matiasbaldanza/taller-gh-actions-2:latest
+
+      # Conexión SSH al VPS para pull y run
+      - name: Deploy en VPS (pull y run)
+        uses: appleboy/ssh-action@v1.0.0
+        with:
+          host: ${{ secrets.VPS_HOST }}
+          port: ${{ secrets.VPS_PORT }}
+          username: ${{ secrets.VPS_USER }}
+          password: ${{ secrets.VPS_PASSWORD }}
+          script: |
+            docker stop app || true
+            docker rm app || true
+
+            docker pull matiasbaldanza/taller-gh-actions-2:latest
+
+            docker run -d --name app -p 8000:3000 matiasbaldanza/taller-gh-actions-2:latest
+
+            echo "Esperando 5 segundos para el health check..."
+            sleep 5
+
+            if curl -f http://localhost:8000 > /dev/null; then
+              echo "✔️ Health check exitoso: la app está funcionando"
+            else
+              echo "❌ Health check fallido: la app no respondió correctamente"
+              exit 1
+            fi
