@@ -5,8 +5,11 @@ on:
 
 jobs:
   deploy:
-    - name: Despliegue por SSH con contraseña
-      uses: appleboy/ssh-action@v1.0.0
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Despliegue por SSH con contraseña
+        uses: appleboy/ssh-action@v1.0.0
         with:
           host: ${{ secrets.VPS_HOST }}
           port: ${{ secrets.VPS_PORT }}
@@ -19,17 +22,21 @@ jobs:
             if [ ! -d "taller-gh-actions-2" ]; then
               git clone https://github.com/matiasbaldanza/taller-gh-actions-2.git
             fi
-            
+
             cd taller-gh-actions-2
             git pull origin main
 
             # Construir la imagen
             docker build -t app:latest .
 
+            # Eliminar contenedor previo si existe
+            docker stop app || true
+            docker rm app || true
+
             # Ejecutar el contenedor en puerto 8000
             docker run -d --name app -p 8000:3000 app:latest
 
-            # HEALTHCHECK TIMEOUT
+            # Esperar unos segundos para que la app levante
             echo "Esperando 5 segundos para el health check..."
             sleep 5
 
@@ -40,4 +47,3 @@ jobs:
               echo "❌ Health check fallido: la app no respondió correctamente"
               exit 1
             fi
-  
