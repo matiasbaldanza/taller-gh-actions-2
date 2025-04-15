@@ -1,0 +1,51 @@
+name: Deploy remoto con build en el servidor
+
+on:
+  workflow_dispatch:
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+  steps:
+    - name: Despliegue por SSH con contraseña
+      uses: appleboy/ssh-action@v1.0.0
+      with:
+        host: ${{ secrets.VPS_HOST }}
+        port: ${{ secrets.VPS_PORT }}
+        username: ${{ secrets.VPS_USER }}
+        password: ${{ secrets.VPS_PASSWORD }}
+        script: |
+          cd /home/${{ secrets.VPS_USER }}
+          
+          # Clonar o actualizar el repo
+          if [ ! -d "taller-gh-actions-2" ]; then
+            git clone https://github.com/matiasbaldanza/taller-gh-actions-2.git
+          fi
+
+          cd taller-gh-actions-2
+          git pull origin main
+
+          # Build de la imagen
+          docker build -t app:latest .
+
+          # Eliminar contenedor previo si existe
+          docker stop app || true
+          docker rm app || true
+
+          # Ejecutar el contenedor en puerto 8000
+          docker run -d --name app -p 8000:3000 app:latest
+
+          # Esperar unos segundos para que la app levante
+          echo "Esperando 5 segundos para el health check..."
+          sleep 5
+
+          # Healthcheck
+          if curl -f http://localhost:8000 > /dev/null; then
+            echo "✔️ Health check exitoso: la app está funcionando"
+          else
+            echo "❌ Health check fallido: la app no respondió correctamente"
+            exit 1
+          fi
+
+          
